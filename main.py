@@ -152,6 +152,8 @@ def select_target_customers(
     ].copy()
     
     print(f"Filtered customers: {len(result)}")
+    print(f"Unique hh_comp values: {customers['hh_comp_desc'].unique()}")
+    print(f"Unique kid_category values: {customers['kid_category_desc'].unique()}")
     return result
 
 def generate_email_addresses(
