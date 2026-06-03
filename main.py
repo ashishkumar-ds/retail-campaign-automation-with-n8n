@@ -130,8 +130,12 @@ def filter_stores_by_phase(
 def select_target_customers(
     customers: pd.DataFrame
 ) -> pd.DataFrame:
-
-    return customers[
+    
+    # Debug info
+    print(f"Total customers: {len(customers)}")
+    print(f"Unique ages: {customers['age_desc'].unique()}")
+    
+    result = customers[
         (customers["age_desc"] == "45-54")
         &
         (customers["income_desc"] == "50-74K")
@@ -146,6 +150,9 @@ def select_target_customers(
             == "None/Unknown"
         )
     ].copy()
+    
+    print(f"Filtered customers: {len(result)}")
+    return result
 
 def generate_email_addresses(
     customers: pd.DataFrame
