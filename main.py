@@ -147,7 +147,20 @@ def select_target_customers(
         )
     ].copy()
 
+def generate_email_addresses(
+    customers: pd.DataFrame
+) -> pd.DataFrame:
 
+    customers = customers.copy()
+
+    customers["email"] = (
+        customers["household_key"]
+        .astype(str)
+        + "@campaign18.com"
+    )
+
+    return customers
+    
 def create_campaign_in_brevo(
     phase: str
 ) -> dict:
@@ -235,10 +248,16 @@ def run_campaign(
     )
 
     target_customers = (
-        select_target_customers(
-            customers
-        )
+    select_target_customers(
+        customers
     )
+)
+
+target_customers = (
+    generate_email_addresses(
+        target_customers
+    )
+)
 
     if selected_stores.empty:
 
@@ -273,33 +292,40 @@ def run_campaign(
         )
 
     result = {
-        "run_timestamp":
-            datetime.utcnow().isoformat(),
+    "run_timestamp":
+        datetime.utcnow().isoformat(),
 
-        "phase":
-            phase,
+    "phase":
+        phase,
 
-        "stores_selected":
-            int(len(selected_stores)),
+    "stores_selected":
+        int(len(selected_stores)),
 
-        "customers_targeted":
-            int(len(target_customers)),
+    "customers_targeted":
+        int(len(target_customers)),
 
-        "campaign":
-            "Campaign 18",
+    "campaign":
+        "Campaign 18",
 
-        "timing":
-            "12 PM - 6 PM",
+    "target_segment":
+        (
+            "Age 45-54 | "
+            "Income 50-74K | "
+            "2 Adults No Kids"
+        ),
 
-        "api_status":
-            api_status,
+    "timing":
+        "12 PM - 6 PM",
 
-        "test_mode":
-            test_mode,
+    "api_status":
+        api_status,
 
-        "rollout_status":
-            f"{phase} execution completed"
-    }
+    "test_mode":
+        test_mode,
+
+    "rollout_status":
+        f"{phase} execution completed"
+}
 
     append_audit_log(result)
 
