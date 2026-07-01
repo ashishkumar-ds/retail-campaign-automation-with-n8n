@@ -41,8 +41,8 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 | Phase | Min Best Customers | Min Sales Value |
 |---|---|---|
 | **Pilot** | ≥ 70 | ≥ $50,000 |
-| **Phase 1** | 50–69 | — |
-| **Phase 2** | 20–49 | — |
+| **Phase 1** | 50–69 | $35K–$50K |
+| **Phase 2** | 20–49 | $20K–$35K |
 
 356 zombie stores excluded. Total eligible: 85 stores across all phases.
 
