@@ -44,8 +44,8 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 | **Phase 1** | 50–69 | $35K–$50K |
 | **Phase 2** | 20–49 | $20K–$35K |
 
-***356 zombie stores excluded. Total eligible: 85 stores across all phases.
-Note:Successful completion of Phase 2 represents full rollout across all 85 eligible stores.***
+356 zombie stores excluded. Total eligible: 85 stores across all phases.
+*Note:Successful completion of Phase 2 represents full rollout across all 85 eligible stores.*
 ---
 
 ## API Endpoints
