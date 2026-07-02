@@ -6,4 +6,4 @@ The deck translates the end-to-end automation workflow into a clear, business-fo
 
 No technical deep dive. Just business impact.
 
-View the deck here
+[View the deck here](https://github.com/ashishkumar-ds/retail-campaign-automation-with-n8n/blob/main/presentation/presentation.pdf)
