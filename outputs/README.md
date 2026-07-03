@@ -32,7 +32,7 @@ Shows the structured JSON output returned by the `/run-campaign` endpoint after 
 
 ## Stakeholder Email Alert
 
-**File:** `stakeholder_email.png`
+**File:** [`stakeholder_email.png`](https://github.com/ashishkumar-ds/retail-campaign-automation-with-n8n/blob/main/outputs/stakeholder%20email.jpg)
 
 Shows the automated Gmail notification sent by n8n after the Pilot phase completed successfully. The email confirms:
 
