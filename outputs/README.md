@@ -24,7 +24,7 @@ Shows the structured JSON output returned by the `/run-campaign` endpoint after 
 - `campaign`: Campaign 18
 - `target_segment`: Age 45-54 | Income 50-74K | 2 Adults No Kids
 - `timing`: 12 PM - 6 PM
-- `benchmark_sales_uplift`: 10.8%
+- `benchmark_sales_uplift`: 10.7%
 - `rollout_decision`: ADVANCE_PHASE
 - `rollout_status`: Pilot execution completed
 
