@@ -18,7 +18,7 @@ BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL", "")
 # Forecast API deployed from store_performance_analysis.ipynb (LightGBM, Optuna-tuned)
 FORECAST_API_URL = os.getenv(
     "FORECAST_API_URL",
-    "https://retail-forecast-api.onrender.com",
+    "https://retail-forecast-api-7sue.onrender.com/",
 )
 
 # Pre-computed rollout tiers (top 5 / next 25 / next 55 stores by verified
