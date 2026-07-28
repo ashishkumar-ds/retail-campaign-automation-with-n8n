@@ -26,14 +26,14 @@ FORECAST_API_URL = os.getenv(
 # not a re-derived total-customer threshold.
 STORE_DATA_URL = (
     "https://raw.githubusercontent.com/"
-    "ashishkumar-ds/retail-campaign-automation/"
-    "main/datasets/eligible_stores_85.csv"
+    "ashishkumar-ds/retail-campaign-automation-with-n8n/"
+    "main/datasets/stores.csv"
 )
 
 # Has a segment_cust column (RFM label) alongside demographic fields
 CUSTOMER_DATA_URL = (
     "https://raw.githubusercontent.com/"
-    "ashishkumar-ds/retail-campaign-automation/"
+    "ashishkumar-ds/retail-campaign-automation-with-n8n/"
     "main/datasets/customer%20demographic.csv"
 )
 
