@@ -88,11 +88,29 @@ def filter_stores_by_phase(
     phase: str
 ) -> pd.DataFrame:
     """
-    Reads store eligibility straight from the pre-computed `phase` column
-    (top 5 / next 25 / next 55 stores by verified Best Customer count).
-    
+    Select stores for the current rollout phase based on
+    Best Customer count ranking from the analysis.
     """
-    return stores[stores["phase"] == phase].copy()
+
+    stores = stores.copy()
+
+    # Highest Best Customer count first
+    stores = stores.sort_values(
+        by="total_customer",
+        ascending=False
+    ).reset_index(drop=True)
+
+    if phase == "Pilot":
+        return stores.iloc[:5].copy()
+
+    elif phase == "Phase 1":
+        return stores.iloc[5:30].copy()
+
+    elif phase == "Phase 2":
+        return stores.iloc[30:85].copy()
+
+    else:
+        raise ValueError(f"Invalid rollout phase: {phase}")
 
 
 def select_target_customers(
