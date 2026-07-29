@@ -35,11 +35,11 @@ This project operationalizes the findings from the Retail Store Performance Anal
 
 Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using the following criteria:
 
-| Phase | Min Best Customers | Min Sales Value |
-|---|---|---|
-| **Pilot** | ≥ 70 | ≥ $50,000 |
-| **Phase 1** | 50–69 | $35K–$50K |
-| **Phase 2** | 20–49 | $20K–$35K |
+| Phase | Stores | Selection Rule |
+|-------|-------:|----------------|
+| **Pilot** | 5 | Top 5 stores ranked by **Best Customer Count** |
+| **Phase 1** | 25 | Next 25 stores ranked by **Best Customer Count** |
+| **Phase 2** | 55 | Next 55 stores ranked by **Best Customer Count** |
 
 356 zombie stores excluded. Total eligible: 85 stores across all phases.
 
