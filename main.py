@@ -305,6 +305,7 @@ def run_campaign(test_mode: bool = True) -> dict:
         "run_timestamp": utcnow_iso(),
         "phase": phase,
         "stores_selected": int(len(selected_stores)),
+        "store_ids": selected_stores["store_id"].tolist(),
         "customers_targeted": int(len(target_customers)),
         "campaign": "Campaign 18",
         "target_segment": "Best Customers (segment_cust)",
