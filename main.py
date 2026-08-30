@@ -342,10 +342,33 @@ def run_campaign_endpoint(test_mode: bool = True):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+_AUDIT_CONTRACT_FIELDS = ("campaign", "timing", "run_timestamp", "store_ids")
+
+
 @app.get("/audit")
-def get_audit_log():
+def get_audit_log(schema: str = "full"):
+    """
+    Return execution run records.
+
+    schema=full (default): every persisted field of each run - used by the
+    human audit viewer and n8n reporting.
+
+    schema=contract: only the fields Project 3's read-only campaign-audit
+    contract consumes (campaign, timing, run_timestamp, store_ids). Project 3
+    validates this response strictly and rejects runs carrying unexpected
+    fields (execution/rollout detail is not audit evidence of delivery), so
+    consumers must request this schema explicitly.
+    """
     runs = read_audit_log()
+    if schema == "contract":
+        runs = [
+            {field: run[field] for field in _AUDIT_CONTRACT_FIELDS if field in run}
+            for run in runs
+        ]
+    elif schema != "full":
+        raise HTTPException(status_code=400, detail="schema must be 'full' or 'contract'")
     return {"total_runs": len(runs), "runs": runs}
+
 
 
 @app.get("/state")
