@@ -31,6 +31,13 @@ This project operationalizes the findings from the Retail Store Performance Anal
 
 ---
 
+## Notebooks
+
+| Notebook | Description |
+|----------|-------------|
+| `campaign_automation_analysis.ipynb` | Executable walkthrough of the automation logic: store eligibility, phase selection, customer targeting, audit trail, and the forecast-vs-causal rollout gate — every `main.py` rule reproduced in inspectable pandas. Start here. |
+| `main.py` | FastAPI service implementing the same rules for the deployed n8n workflow. |
+
 ## Rollout Design
 
 Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using the following criteria:
@@ -92,7 +99,7 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 This is a portfolio-scale system built on a single historical dataset, not a live production deployment.
 
 - **In-memory state**: campaign phase and audit log reset on server restart. In production this would persist to a database
-- **Benchmark validation**: the 10.7% uplift threshold is hardcoded from Campaign 18 historical results, not computed from live run data
+- **Benchmark validation**: the rollout gate is **env-configurable** — `PILOT_UPLIFT_PCT` / `PILOT_CI_LOW` / `PILOT_CI_HIGH`. Defaults carry the forecast benchmark (+30.1% pooled, which absorbs +9.7% market drift) with an explicit origin label in `validation_reason`; set them to the causal DiD estimate (2.84 / −0.5 / 6.2) to gate on causal impact, matching Part 3's 3% target
 - **Synthetic emails**: customer emails are generated as `household_key@campaign18.com` and do not represent real CRM contacts
 - **No retry logic**: failed runs are surfaced as errors but not automatically retried
 
@@ -116,10 +123,22 @@ dunnhumby-campaign-automation/
 ├── datasets/          # Static source datasets (CSV/Excel) from Dunnhumby
 ├── outputs/           # Workflow execution output, API response, and stakeholder email samples
 │
+├── campaign_automation_analysis.ipynb  # Executable analysis notebook (start here)
 ├── main.py            # FastAPI app: store scoring, eligibility, campaign logic
+├── audit_log.jsonl    # Append-only execution audit log (consumed by Part 3)
 ├── render.yaml        # Render deployment configuration
 ├── requirements.txt   # Python dependencies
 ├── runtime.txt        # Python runtime version for Render
 ├── .gitignore
 └── README.md
 ```
+
+---
+
+## References
+
+1. dunnhumby — *Personalised Offers for Retailers* (campaign framework, addressable-base targeting)
+2. dunnhumby — *Retail:Vision* (2026) — connected AI-powered decision making (series motivation)
+3. WARC — *ROI of Successful Campaigns Continues to Grow* (ROI benchmark used in Part 1)
+4. Part-1 notebook — `store_performance_analysis_with_DiD.ipynb`, DiD Validation section (causal estimates that gate this system's rollout)
+

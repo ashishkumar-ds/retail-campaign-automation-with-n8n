@@ -23,7 +23,14 @@ FORECAST_API_URL = os.getenv(
 
 # Pre-computed rollout tiers (top 5 / next 25 / next 55 stores by verified
 # Best Customer count) - matches the notebook's actual store segmentation,
-# not a re-derived total-customer threshold.
+# not a re-derived total-customer threshold. Single source of truth shared
+# with campaign_automation_analysis.ipynb.
+PHASE_SLICES = {
+    "Pilot": (0, 5),
+    "Phase 1": (5, 30),
+    "Phase 2": (30, 85),
+}
+PHASE_ORDER = ["Pilot", "Phase 1", "Phase 2"]
 STORE_DATA_URL = (
     "https://raw.githubusercontent.com/"
     "ashishkumar-ds/retail-campaign-automation-with-n8n/"
@@ -91,26 +98,16 @@ def filter_stores_by_phase(
     Select stores for the current rollout phase based on
     Best Customer count ranking from the analysis.
     """
+    if phase not in PHASE_SLICES:
+        raise ValueError(f"Invalid rollout phase: {phase}")
 
-    stores = stores.copy()
+    lo, hi = PHASE_SLICES[phase]
 
-    # Highest Best Customer count first
-    stores = stores.sort_values(
+    # Highest Best Customer count first, then slice the phase window
+    return stores.sort_values(
         by="total_customer",
         ascending=False
-    ).reset_index(drop=True)
-
-    if phase == "Pilot":
-        return stores.iloc[:5].copy()
-
-    elif phase == "Phase 1":
-        return stores.iloc[5:30].copy()
-
-    elif phase == "Phase 2":
-        return stores.iloc[30:85].copy()
-
-    else:
-        raise ValueError(f"Invalid rollout phase: {phase}")
+    ).reset_index(drop=True).iloc[lo:hi].copy()
 
 
 def select_target_customers(
@@ -401,17 +398,15 @@ def get_state():
 @app.post("/advance-phase")
 def advance_phase():
     current_phase = _campaign_state.get("current_phase", "Pilot")
+    idx = PHASE_ORDER.index(current_phase)
 
-    if current_phase == "Pilot":
-        _campaign_state["current_phase"] = "Phase 1"
-    elif current_phase == "Phase 1":
-        _campaign_state["current_phase"] = "Phase 2"
-    elif current_phase == "Phase 2":
+    if idx == len(PHASE_ORDER) - 1:
         return {
             "message": "Already at final rollout phase.",
             "current_phase": current_phase
         }
 
+    _campaign_state["current_phase"] = PHASE_ORDER[idx + 1]
     update_state_timestamp()
     return {
         "message": "Rollout phase advanced successfully.",
@@ -423,17 +418,15 @@ def advance_phase():
 @app.post("/rollback-phase")
 def rollback_phase():
     current_phase = _campaign_state.get("current_phase", "Pilot")
+    idx = PHASE_ORDER.index(current_phase)
 
-    if current_phase == "Phase 2":
-        _campaign_state["current_phase"] = "Phase 1"
-    elif current_phase == "Phase 1":
-        _campaign_state["current_phase"] = "Pilot"
-    else:
+    if idx == 0:
         return {
             "message": "Already at Pilot phase.",
             "current_phase": current_phase
         }
 
+    _campaign_state["current_phase"] = PHASE_ORDER[idx - 1]
     update_state_timestamp()
     return {
         "message": "Rollout phase rolled back successfully.",
