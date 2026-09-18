@@ -44,6 +44,14 @@ CUSTOMER_DATA_URL = (
     "main/datasets/customer%20demographic.csv"
 )
 
+# Local-first data loading: prefer the datasets/ directory committed with the
+# repo (works offline, deterministic tests), fall back to the raw GitHub URLs
+# for cloud deploys where the working directory doesn't ship data files.
+STORE_DATA_PATH = Path(os.getenv("STORE_DATA_PATH", "datasets/stores.csv"))
+CUSTOMER_DATA_PATH = Path(
+    os.getenv("CUSTOMER_DATA_PATH", "datasets/customer demographic.csv")
+)
+
 AUDIT_LOG_PATH = Path(os.getenv("AUDIT_LOG_PATH", "audit_log.jsonl"))
 
 _campaign_state = {
@@ -71,13 +79,15 @@ def utcnow_iso() -> str:
 
 
 def load_stores() -> pd.DataFrame:
-    df = pd.read_csv(STORE_DATA_URL)
+    source = STORE_DATA_PATH if STORE_DATA_PATH.exists() else STORE_DATA_URL
+    df = pd.read_csv(source)
     df.columns = df.columns.str.strip().str.lower()
     return df
 
 
 def load_customers() -> pd.DataFrame:
-    df = pd.read_csv(CUSTOMER_DATA_URL)
+    source = CUSTOMER_DATA_PATH if CUSTOMER_DATA_PATH.exists() else CUSTOMER_DATA_URL
+    df = pd.read_csv(source)
     df.columns = df.columns.str.strip().str.lower()
     return df
 
