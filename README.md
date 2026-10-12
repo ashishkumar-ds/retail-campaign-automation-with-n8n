@@ -1,6 +1,11 @@
 # Retail Campaign Automation with n8n
 
 [![CI](https://github.com/ashishkumar-ds/retail-campaign-automation-with-n8n/actions/workflows/ci.yml/badge.svg)](https://github.com/ashishkumar-ds/retail-campaign-automation-with-n8n/actions/workflows/ci.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![n8n](https://img.shields.io/badge/orchestration-n8n-EA4B71?logo=n8n&logoColor=white)](https://n8n.io)
+[![Live API](https://img.shields.io/badge/api-render-46e3b7?logo=render&logoColor=white)](https://retail-campaign-automation.onrender.com/)
+[![Brevo](https://img.shields.io/badge/delivery-brevo-0B996E)](https://www.brevo.com)
 
 > Part 2 of the Dunnhumby series. See [Part 1 — Retail Store Performance Analysis](https://github.com/ashishkumar-ds/data-science-projects/tree/main/dunnhumby-retail-performance-analysis) for the full analytical foundation.
 
