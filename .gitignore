@@ -2,4 +2,5 @@
 __pycache__/
 *.pyc
 venv/
-*.logaudit_log.jsonl
+*.log
+audit_log.jsonl
