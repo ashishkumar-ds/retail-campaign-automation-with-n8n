@@ -13,8 +13,6 @@
 
 ## Project Summary
 
-Scaling proven campaign strategy across 85 underperforming stores with a scheduled, audited rollout — pilot → phase → full coverage, gated on measured uplift.
-
 This project operationalizes the findings from the Retail Store Performance Analysis by building an **end-to-end campaign automation system** across 85 eligible underperforming stores. Using **FastAPI, n8n, and Brevo**, the system automates store eligibility scoring, customer targeting, campaign delivery, audit logging, and stakeholder reporting, replacing a fully manual, per-store analyst process with a single scheduled trigger.
 
 
