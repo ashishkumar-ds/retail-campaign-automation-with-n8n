@@ -145,7 +145,7 @@ dunnhumby-campaign-automation/
 ## References
 
 1. dunnhumby — *Personalised Offers for Retailers* (campaign framework, addressable-base targeting)
-2. dunnhumby — *Retail:Vision* (2026) — connected AI-powered decision making (series motivation)
-3. WARC — *ROI of Successful Campaigns Continues to Grow* (ROI benchmark used in Part 1)
-4. Part-1 notebook — `store_performance_analysis_with_DiD.ipynb`, DiD Validation section (causal estimates that gate this system's rollout)
+2. dunnhumby — [Retail:Vision](https://www.dunnhumby.com/reports/retail-vision-report/) (2026) — connected, AI-powered retail decision-making (series motivation)
+3. WARC — [ROI of Successful Campaigns Continues to Grow](https://www.warc.com/en/feed/roi-of-successful-campaigns-continues-to-grow-7a1825cccc034f6ea0a62ecb0c7d9997) (2024; ROI benchmark used in Part 1)
+4. Part-1 notebook — [store_performance_analysis_with_DiD.ipynb](https://github.com/ashishkumar-ds/data-science-projects/blob/main/dunnhumby-retail-performance-analysis/notebooks/store_performance_analysis_with_DiD.ipynb), DiD Validation section (causal estimates that gate this system's rollout)
 
