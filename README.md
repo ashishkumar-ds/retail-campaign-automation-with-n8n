@@ -149,3 +149,6 @@ dunnhumby-campaign-automation/
 3. WARC — [ROI of Successful Campaigns Continues to Grow](https://www.warc.com/en/feed/roi-of-successful-campaigns-continues-to-grow-7a1825cccc034f6ea0a62ecb0c7d9997) (2024; ROI benchmark used in Part 1)
 4. Part-1 notebook — [store_performance_analysis_with_DiD.ipynb](https://github.com/ashishkumar-ds/data-science-projects/blob/main/dunnhumby-retail-performance-analysis/notebooks/store_performance_analysis_with_DiD.ipynb), DiD Validation section (causal estimates that gate this system's rollout)
 
+## License
+
+MIT — see [LICENSE](LICENSE).
