@@ -33,7 +33,7 @@ This project operationalizes the findings from the Retail Store Performance Anal
 | **Business Logic** | FastAPI on Render | Store scoring, eligibility, targeting rules |
 | **Orchestration** | n8n | Scheduled workflow, phase advancement, failure handling |
 | **Campaign Delivery** | Brevo | Email campaign execution |
-| **Audit Log** | Google Sheets | Timestamped execution record per run |
+| **Audit Log** | Append-only JSONL (`audit_log.jsonl`) | Timestamped execution record per run, served at `/audit` |
 | **Stakeholder Alerts** | Gmail | Automated deployment summary per phase |
 
 ---
@@ -80,8 +80,8 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 
 | Output | Description |
 |---|---|
-| **Execution log** | Timestamped in-memory record per run, accessible via `/audit` |
-| **Rollout decision** | Advance or hold based on Campaign 18 benchmark |
+| **Execution log** | Timestamped record appended to `audit_log.jsonl` per run, accessible via `/audit` |
+| **Rollout decision** | Advance or hold: causal DiD benchmark by default, forecast benchmark on env override |
 | **Stakeholder email** | Gmail summary with phase, stores, customers, and status |
 | **Failure flag** | Failed runs surface a 500 error with detail for manual review |
 
@@ -93,7 +93,7 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 |---|---|---|
 | **Execution process** | Manual per-store analyst review | Single n8n trigger, fully automated |
 | **Business rule application** | Inconsistent across stores | Centralized in FastAPI, applied uniformly |
-| **Audit trail** | None | Timestamped log per run in Google Sheets |
+| **Audit trail** | None | Timestamped record appended to `audit_log.jsonl` per run |
 | **Stakeholder visibility** | Ad hoc reporting | Automated Gmail alert per deployment |
 | **Failure handling** | Silent failures | Logged and flagged for review |
 
@@ -105,8 +105,8 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 
 This is a portfolio-scale system built on a single historical dataset, not a live production deployment.
 
-- **In-memory state**: campaign phase and audit log reset on server restart. In production this would persist to a database
-- **Benchmark validation**: the rollout gate is **env-configurable** — `PILOT_UPLIFT_PCT` / `PILOT_CI_LOW` / `PILOT_CI_HIGH`. Defaults carry the forecast benchmark (+30.1% pooled, which absorbs +9.7% market drift) with an explicit origin label in `validation_reason`; set them to the causal DiD estimate (2.84 / −0.5 / 6.2) to gate on causal impact, matching Part 3's 3% target
+- **In-memory state**: campaign phase resets on server restart. The audit log is an append-only local `audit_log.jsonl`, so it survives restarts but not redeploys on ephemeral hosting; in production both would persist to a database
+- **Benchmark validation**: the rollout gate is **env-configurable** — `PILOT_UPLIFT_PCT` / `PILOT_CI_LOW` / `PILOT_CI_HIGH`. Defaults carry the causal DiD estimate (2.84 / −0.5 / 6.2), whose CI admits zero, so the default decision is `HOLD_PHASE`; `validation_reason` records the figure's origin. The forecast benchmark (+30.1%, which absorbs +9.7% market drift) is an explicit opt-in, not the default
 - **Synthetic emails**: customer emails are generated as `household_key@campaign18.com` and do not represent real CRM contacts
 - **No retry logic**: failed runs are surfaced as errors but not automatically retried
 
@@ -118,7 +118,7 @@ This is a portfolio-scale system built on a single historical dataset, not a liv
 - **Orchestration**: n8n
 - **Deployment**: Render
 - **Campaign Delivery**: Brevo
-- **Logging and Alerts**: Google Sheets, Gmail
+- **Logging and Alerts**: append-only JSONL audit log; Gmail summary from the n8n workflow
 
 ---
 

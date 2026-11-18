@@ -185,42 +185,51 @@ def get_forecast_signal(store_ids: list[int]) -> dict:
 
 def validate_campaign_benchmark(selected_stores: pd.DataFrame) -> dict:
     """
-    Rollout decision driven by the pooled pilot-store validation from
-    store_performance_analysis_with_DiD.ipynb (§7, LightGBM + Optuna, bootstrap-
-    validated), combined with a live forecast trend check against the
-    stores actually selected for this run.
+    Rollout gate on the pilot validation from
+    store_performance_analysis_with_DiD.ipynb, combined with a live forecast
+    trend check against the stores actually selected for this run.
 
-    Dunnhumby/84.51 note: the +30.1% is a single-series forecast counterfactual
-    that absorbs market drift (+9.7% in the notebook's DiD §8). Causal DiD on
-    the same window is +2.84% ITT (p=0.10, 981 clean controls) / -9.6% store-level.
-    P3 Decision Agent gates scale-up on the causal target 3.0% (see
-    retail-decision-intelligence-agent-v4/decision_engine/calibration.py:TARGET_UPLIFT_PCT),
-    not this pilot benchmark. This function keeps the forecast figure for
-    operational rollout gating, with the distinction made explicit in the
-    validation_reason and via env overrides below.
+    Default benchmark = the causal household ITT estimate: +2.84% with a 95% CI
+    of -0.5% to +6.2% (981 clean controls). The CI admits zero, so the default
+    gate is HOLD_PHASE — no phase advances on forecast-based attribution. This
+    matches Part 3, which gates scale-up on the causal 3.0% target
+    (retail-decision-intelligence-agent-v4/decision_engine/calibration.py:
+    TARGET_UPLIFT_PCT), and Part 1's recommendation not to scale on the
+    forecast evidence.
 
-    Env overrides (must-do for causally-aware deploys):
-      PILOT_UPLIFT_PCT / PILOT_CI_LOW / PILOT_CI_HIGH — e.g. set to 2.84 / -0.5 / 6.2
-      to align rollout gating with the causal estimate.
+    The +30.1% [+11.9%, +51.0%] forecast benchmark is an explicit opt-in:
+        PILOT_UPLIFT_PCT=30.1 PILOT_CI_LOW=11.9 PILOT_CI_HIGH=51.0
+    It is a single-series LightGBM counterfactual that absorbs +9.7% market
+    drift, so treat it as directional only. Pair any override with
+    PILOT_BENCHMARK_ORIGIN so the audit log records where the number came from.
     """
     store_ids = selected_stores["store_id"].tolist() if "store_id" in selected_stores else []
     live_signal = get_forecast_signal(store_ids[:10])  # cap calls for latency
 
-    # Notebook-validated pilot result (pooled, sales-weighted, bootstrap CI)
-    # Defaults = forecast benchmark; override via env to use the causal benchmark.
-    pilot_uplift_pct = float(os.getenv("PILOT_UPLIFT_PCT", "30.1"))
-    pilot_ci_low = float(os.getenv("PILOT_CI_LOW", "11.9"))
-    pilot_ci_high = float(os.getenv("PILOT_CI_HIGH", "51.0"))
+    # Defaults = causal DiD ITT; the forecast benchmark is an explicit opt-in.
+    overrides = {
+        name: os.getenv(name)
+        for name in ("PILOT_UPLIFT_PCT", "PILOT_CI_LOW", "PILOT_CI_HIGH")
+    }
+    pilot_uplift_pct = float(overrides["PILOT_UPLIFT_PCT"] or "2.84")
+    pilot_ci_low = float(overrides["PILOT_CI_LOW"] or "-0.5")
+    pilot_ci_high = float(overrides["PILOT_CI_HIGH"] or "6.2")
 
     decision = "ADVANCE_PHASE" if pilot_ci_low > 0 else "HOLD_PHASE"
     # Label the figure's origin so operators don't conflate forecast vs causal lift
-    benchmark_origin = os.getenv("PILOT_BENCHMARK_ORIGIN", "forecast (single-series LightGBM, absorbs +9.7% drift)")
-    if os.getenv("PILOT_UPLIFT_PCT"):
-        benchmark_origin = os.getenv("PILOT_BENCHMARK_ORIGIN", "causal DiD (calibrated)")
+    benchmark_origin = os.getenv(
+        "PILOT_BENCHMARK_ORIGIN",
+        "operator override" if any(overrides.values())
+        else "causal DiD (household ITT, 981 clean controls)",
+    )
+    gate_reason = (
+        "CI excludes zero" if decision == "ADVANCE_PHASE"
+        else "CI admits zero, so no phase advances on this evidence"
+    )
     reason = (
-        f"Pilot validation shows +{pilot_uplift_pct}% pooled sales uplift "
-        f"(95% CI: {pilot_ci_low}% to {pilot_ci_high}%), positive in 99.9% "
-        f"of bootstrap draws — source: {benchmark_origin}."
+        f"Pilot benchmark {pilot_uplift_pct:+.2f}% "
+        f"(95% CI: {pilot_ci_low:+.2f}% to {pilot_ci_high:+.2f}%) — "
+        f"source: {benchmark_origin}; gate {decision} ({gate_reason})."
     )
     if live_signal["forecast_signal_available"]:
         reason += (

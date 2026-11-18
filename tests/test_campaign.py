@@ -94,6 +94,40 @@ def test_audit_log_roundtrip(tmp_path, monkeypatch):
     assert [r["store_ids"] for r in campaign.read_audit_log()] == [[1, 2], [3]]
 
 
+def test_benchmark_defaults_to_causal_and_holds(monkeypatch, stores_df):
+    for name in ("PILOT_UPLIFT_PCT", "PILOT_CI_LOW", "PILOT_CI_HIGH", "PILOT_BENCHMARK_ORIGIN"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setattr(
+        campaign, "get_forecast_signal",
+        lambda ids: {"forecast_signal_available": False},
+    )
+
+    result = campaign.validate_campaign_benchmark(stores_df)
+
+    assert result["benchmark_sales_uplift"] == 2.84
+    assert result["benchmark_ci"] == [-0.5, 6.2]
+    assert result["rollout_decision"] == "HOLD_PHASE"
+    assert "causal DiD" in result["validation_reason"]
+    assert "HOLD_PHASE" in result["validation_reason"]
+
+
+def test_benchmark_forecast_override_advances(monkeypatch, stores_df):
+    monkeypatch.setenv("PILOT_UPLIFT_PCT", "30.1")
+    monkeypatch.setenv("PILOT_CI_LOW", "11.9")
+    monkeypatch.setenv("PILOT_CI_HIGH", "51.0")
+    monkeypatch.delenv("PILOT_BENCHMARK_ORIGIN", raising=False)
+    monkeypatch.setattr(
+        campaign, "get_forecast_signal",
+        lambda ids: {"forecast_signal_available": False},
+    )
+
+    result = campaign.validate_campaign_benchmark(stores_df)
+
+    assert result["benchmark_sales_uplift"] == 30.1
+    assert result["rollout_decision"] == "ADVANCE_PHASE"
+    assert "operator override" in result["validation_reason"]
+
+
 # ---- forecast signal (patched HTTP) ----
 
 class FakeResp:
