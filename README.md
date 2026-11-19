@@ -13,13 +13,13 @@
 
 ## Project Summary
 
-This project operationalizes the findings from the Retail Store Performance Analysis by building an **end-to-end campaign automation system** across 85 eligible underperforming stores. Using **FastAPI, n8n, and Brevo**, the system automates store eligibility scoring, customer targeting, campaign delivery, audit logging, and stakeholder reporting, replacing a fully manual, per-store analyst process with a single scheduled trigger.
+This project operationalizes the findings from the Retail Store Performance Analysis by building an **end-to-end campaign automation system** across 85 eligible underperforming stores. Using **FastAPI, n8n, and Brevo**, the system automates store eligibility scoring, customer targeting, campaign delivery, audit logging, and stakeholder reporting, replacing a manual, per-store analyst process with a single scheduled trigger.
 
 
 ## Problem Statement
 
-- Previous analysis proved **Campaign 18 + Best Customers + afternoon timing** as the strongest growth drivers
-- Manual execution required per-store analyst review, making consistent deployment across **85 stores impossible**
+- Previous analysis identified **Campaign 18 + Best Customers + afternoon timing** as the strongest growth drivers
+- Manual execution required per-store analyst review, making consistent deployment across **85 stores impractical**
 
 **Business Question**:
 > How can proven campaign strategies be scaled efficiently while maintaining execution control and operational visibility?
@@ -31,7 +31,7 @@ This project operationalizes the findings from the Retail Store Performance Anal
 | Layer | Tool | Role |
 |---|---|---|
 | **Business Logic** | FastAPI on Render | Store scoring, eligibility, targeting rules |
-| **Orchestration** | n8n | Scheduled workflow, phase advancement, failure handling |
+| **Orchestration** | n8n | Scheduled workflow, operator-triggered phase advancement, error surfacing |
 | **Campaign Delivery** | Brevo | Email campaign execution |
 | **Audit Log** | Append-only JSONL (`audit_log.jsonl`) | Timestamped execution record per run, served at `/audit` |
 | **Stakeholder Alerts** | Gmail | Automated deployment summary per phase |
@@ -55,7 +55,7 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 | **Phase 1** | 25 | Next 25 stores ranked by Best Customer Count |
 | **Phase 2** | 55 | Next 55 stores ranked by Best Customer Count |
 
-356 zombie stores excluded. Total eligible: 85 stores across all phases.
+426 of the 511 underperforming stores excluded. Total eligible: 85 stores across all phases.
 
 *Note: Successful completion of Phase 2 represents full rollout across all 85 eligible stores.*
 
@@ -74,6 +74,8 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 
 `/run-campaign` accepts `?test_mode=true` (default) to run without hitting Brevo.
 
+Phase advancement is a separate operator action (`POST /advance-phase`); the rollout decision is recorded, not enforced.
+
 ---
 
 ## Key Outputs
@@ -91,11 +93,11 @@ Phase eligibility is determined by `filter_stores_by_phase()` in `main.py` using
 
 | Focus Area | Before | After |
 |---|---|---|
-| **Execution process** | Manual per-store analyst review | Single n8n trigger, fully automated |
+| **Execution process** | Manual per-store analyst review | Single n8n trigger, phased rollout |
 | **Business rule application** | Inconsistent across stores | Centralized in FastAPI, applied uniformly |
 | **Audit trail** | None | Timestamped record appended to `audit_log.jsonl` per run |
 | **Stakeholder visibility** | Ad hoc reporting | Automated Gmail alert per deployment |
-| **Failure handling** | Silent failures | Logged and flagged for review |
+| **Failure handling** | Silent failures | Surfaced as errors with detail |
 
 *Note: portfolio-scale system validated on a single historical dataset. Impact is directional, not measured against a timed production baseline.*
 
@@ -127,7 +129,7 @@ This is a portfolio-scale system built on a single historical dataset, not a liv
 ```bash
 dunnhumby-campaign-automation/
 │
-├── datasets/          # Static source datasets (CSV/Excel) from Dunnhumby
+├── datasets/          # Static source datasets (CSV) from Dunnhumby
 ├── outputs/           # Workflow execution output, API response, and stakeholder email samples
 │
 ├── campaign_automation_analysis.ipynb  # Executable analysis notebook (start here)
